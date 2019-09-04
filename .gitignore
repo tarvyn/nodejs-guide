@@ -1,3 +1,1 @@
-/express-with-routing/node_modules/
-/mvc/node_modules/
-/shop-sql/node_modules/
+**/node_modules/
