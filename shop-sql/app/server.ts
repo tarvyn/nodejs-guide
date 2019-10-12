@@ -7,6 +7,7 @@ import { User } from './model/user';
 import { adminRoutes } from './routes/admin';
 import { shopRoutes } from './routes/shop';
 import { sequelize } from './util/database';
+import { RequestWithUser } from './controllers/admin';
 
 const app = express();
 
@@ -17,10 +18,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => User
+app.use((req: RequestWithUser, res, next) => User
   .findByPk(1)
   .then(user => {
-    (req as any).user = user;
+    req.user = user;
     next();
   })
 );

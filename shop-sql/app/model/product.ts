@@ -1,13 +1,17 @@
 import { BuildOptions, DataTypes, Model } from 'sequelize';
 import { sequelize } from '../util/database';
 
-export interface ProductModel extends Model {
+export interface ProductBase {
   id: number;
   title: string;
   price: number;
   imageUrl: string;
   description: string;
 }
+
+export type CreateProduct = Omit<ProductBase, 'id'>;
+
+export type ProductModel = Model & ProductBase;
 
 export type ProductModelStatic = typeof Model & {
   new(values?: object, options?: BuildOptions): ProductModel;

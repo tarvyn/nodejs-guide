@@ -1,9 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import { rootPath } from '../util/path';
-import { Product } from './product';
+import { ProductModel } from './product';
 
-type ProductInfo = Pick<Product, 'id' | 'price'> & { quantity: number };
+type ProductInfo = Pick<ProductModel, 'id' | 'price'> & { quantity: number };
 
 interface CartInfo {
   products: Array<ProductInfo>;

@@ -1,8 +1,9 @@
 import { Request, RequestHandler } from 'express';
 import { Product, ProductModel } from '../model/product';
 import { UserModel } from '../model/user';
+import {Promise} from 'bluebird';
 
-interface RequestWithUser extends Request {
+export interface RequestWithUser extends Request {
   user?: UserModel;
 }
 
@@ -14,11 +15,11 @@ export const getAddProduct: RequestHandler = (req, res) => {
   });
 };
 
-export const getEditProduct: RequestHandler = (req, res) => {
+export const getEditProduct: RequestHandler = (req: RequestWithUser, res) => {
   const { query: { edit }, params: { productId } } = req;
 
-  Product
-    .findByPk(productId)
+  req.user
+    .getProducts({})
     .then(product => {
       res.render('admin/edit-product', {
         product,
@@ -61,14 +62,12 @@ export const postDeleteProduct: RequestHandler = (req, res) => {
 export const postAddProduct: RequestHandler = (req: RequestWithUser, res) => {
   const { description, imageUrl, price, title } = req.body;
 
-  Product
-    .create({
-      description,
-      imageUrl,
-      price,
-      title,
-      userId: req.user && req.user.id
-    })
+  req.user && req.user.createProduct({
+    description,
+    imageUrl,
+    price,
+    title,
+  })
     .then(() => res.redirect('/admin/products'));
 };
 

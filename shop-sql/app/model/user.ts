@@ -1,10 +1,14 @@
 import { BuildOptions, DataTypes, Model } from 'sequelize';
 import { sequelize } from '../util/database';
+import { CreateProduct, ProductBase } from './product';
 
 export interface UserModel extends Model {
   readonly id: number;
   readonly name: string;
   readonly email: string;
+
+  createProduct(product: CreateProduct): Promise<void>;
+  
 }
 
 export type UserModelStatic = typeof Model & {
