@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="60070490-6c7b-414e-bb37-3910904de6be" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/admin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/admin.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/model/cart.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/model/cart.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/model/product.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/model/product.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/model/user.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/model/user.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/server.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-    </list>
+    <list default="true" id="60070490-6c7b-414e-bb37-3910904de6be" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,7 +33,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="editor.config.ad.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../mongoDB" />
     <property name="list.type.of.created.stylesheet" value="CSS" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
@@ -104,6 +95,7 @@
       <workItem from="1568565773907" duration="683000" />
       <workItem from="1569771242417" duration="105000" />
       <workItem from="1569771514327" duration="7741000" />
+      <workItem from="1570906978489" duration="726000" />
     </task>
     <servers />
   </component>
