@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var express = require("express");
+var shop_1 = require("../controllers/shop");
+var shopRoutes = express.Router();
+exports.shopRoutes = shopRoutes;
+shopRoutes.get('/', shop_1.getIndex);
+shopRoutes.get('/products', shop_1.getProducts);
+shopRoutes.get('/products/:productId', shop_1.getProduct);
+shopRoutes.get('/cart', shop_1.getCart);
+shopRoutes.post('/cart', shop_1.postCart);
+shopRoutes.post('/cart-delete-item', shop_1.postDeleteCartItem);
+shopRoutes.get('/checkout', shop_1.getCheckout);
+shopRoutes.get('/orders', shop_1.getOrders);

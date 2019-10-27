@@ -1,0 +1,24 @@
+.cart {
+    display: flex;
+    flex-flow: column nowrap;
+    list-style: none;
+}
+
+.cart-item {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 50%;
+    padding: 20px;
+    margin: 20px auto;
+    box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+}
+
+.cart-item:first-child {
+    margin-top: 0;
+}
+
+.order-button {
+    text-align: center;
+}
