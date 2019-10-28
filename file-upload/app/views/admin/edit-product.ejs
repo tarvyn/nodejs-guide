@@ -1,0 +1,85 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/forms.css">
+<link rel="stylesheet" href="/css/product.css">
+</head>
+
+<body>
+<%- include('../includes/navigation.ejs') %>
+<main>
+    <form class="product-form"
+            enctype="multipart/form-data"
+            action="<%= editing ? '/admin/edit-product' : '/admin/add-product' %>"
+            method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" class="form-control" name="title" id="title"
+                    value="<%= (product && product.title) || null %>">
+            <% if (validationErrors.title) { %>
+                <div class="invalid-feedback d-block">
+                    <%= validationErrors.title.msg %>
+                </div>
+            <% } %>
+        </div>
+        <!--            <div class="form-group">-->
+        <!--                <label for="imageUrl">Image Url</label>-->
+        <!--                <input type="text" class="form-control" name="imageUrl" id="imageUrl" value="<%= (product && product.imageUrl) || null %>">-->
+        <!--                <% if (validationErrors.imageUrl) { %>-->
+        <!--                    <div class="invalid-feedback d-block">-->
+        <!--                        <%= validationErrors.imageUrl.msg %>-->
+        <!--                    </div>-->
+        <!--                <% } %>-->
+        <!--            </div>-->
+        <div class="form-group">
+            <label for="image">Image File</label>
+            <div class="custom-file">
+                <input id="image" name="image" type="file" class="custom-file-input">
+                <label
+                        class="custom-file-label text-truncate"
+                        for="image">
+                    Choose product image file...
+                </label>
+                <% if (validationErrors.image) { %>
+                    <div class="invalid-feedback d-block">
+                        <%= validationErrors.image.msg %>
+                    </div>
+                <% } %>
+                <script>
+                  $('#image').on('change', function () {
+                    const fileName = $(this).val();
+
+                    $(this).next('.custom-file-label').html(fileName);
+                  })
+                </script>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" class="form-control" name="price" id="price" value="<%= product && product.price %>">
+            <% if (validationErrors.price) { %>
+                <div class="invalid-feedback d-block">
+                    <%= validationErrors.price.msg %>
+                </div>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+                    name="description"
+                    class="form-control"
+                    id="description"
+                    rows="5"
+            ><%= (product && product.description) || null %></textarea>
+            <% if (validationErrors.description) { %>
+                <div class="invalid-feedback d-block">
+                    <%= validationErrors.description.msg %>
+                </div>
+            <% } %>
+        </div>
+        <% if (editing) { %>
+            <input type="hidden" value="<%= product._id %>" name="id">
+        <% } %>
+        <button class="btn btn-primary" type="submit"><%= editing ? 'Update Product' : 'Add Product' %></button>
+    </form>
+</main>
+<%- include('../includes/end.ejs') %>
