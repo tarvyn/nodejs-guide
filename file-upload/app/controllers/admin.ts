@@ -1,6 +1,9 @@
 import { RequestHandler } from 'express';
-import { ProductInfo, ProductModel } from '../model/product.model';
 import { validationResult } from 'express-validator';
+import * as path from 'path';
+import { OrderModel } from '../model/order';
+import { ProductInfo, ProductModel } from '../model/product.model';
+import { deleteFile } from '../util/file';
 
 export const getAddProduct: RequestHandler = (req, res) => {
   res.render('admin/edit-product', {
@@ -92,9 +95,14 @@ export const postEditProduct: RequestHandler = async (req, res, next) => {
   }
 
   try {
-    await product.update({ imageUrl: image && `/images/${image.filename}`, ...productInfo });
+    const imageUrl = image && `/images/${image.filename}`;
+
+    if (image) {
+      await deleteFile(path.join(__dirname, '../', product.imageUrl));
+    }
+    await product.update({ imageUrl, ...productInfo });
   } catch (e) {
-    next(new Error('Error while updating the product occurred.'));
+    return next(new Error('Error while updating the product occurred.'));
   }
 
   res.redirect('/admin/products');
@@ -111,6 +119,9 @@ export const postDeleteProduct: RequestHandler = async (req, res, next) => {
 
   try {
     await ProductModel.findByIdAndDelete(id);
+    await deleteFile(path.join(__dirname, '../', product.imageUrl));
+    // TODO: fix this temporary workaround
+    await OrderModel.deleteMany(() => {});
   } catch (e) {
     next(new Error('Error while deleting the product occurred.'));
   }

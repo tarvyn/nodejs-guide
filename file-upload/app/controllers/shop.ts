@@ -1,8 +1,9 @@
 import { RequestHandler } from 'express';
-import { ProductModel } from '../model/product.model';
-import { OrderModel } from '../model/order';
-import { readFile } from 'fs';
+import { createWriteStream } from 'fs';
 import * as path from 'path';
+import PDFDocument from 'pdfkit';
+import { OrderModel } from '../model/order';
+import { ProductModel } from '../model/product.model';
 
 export const getProducts: RequestHandler = async (req, res) => {
   const prods = await ProductModel.find();
@@ -47,7 +48,7 @@ export const getCart: RequestHandler = async (req, res) => {
   user.cart.products.forEach(({ productId: id }) => productIds.add(id));
 
   const products = await ProductModel.find({ _id: { $in: Array.from(productIds.values()) } });
-  const productsMap = products.reduce((map, product) => ({ [product.id]: product }), {});
+  const productsMap = products.reduce((map, product) => ({ ...map, [product.id]: product }), {});
 
   res.render('shop/cart', {
     products: user.cart.products,
@@ -89,7 +90,7 @@ export const getOrders: RequestHandler = async (req, res) => {
     items.forEach(({ productId: id }) => productIds.add(id)));
 
   const products = await ProductModel.find({ _id: { $in: Array.from(productIds.values()) } });
-  const productsMap = products.reduce((map, product) => ({ [product.id]: product }), {});
+  const productsMap = products.reduce((map, product) => ({ ...map, [product.id]: product }), {});
 
   res.render('shop/orders', {
     orders,
@@ -124,16 +125,36 @@ export const getCheckout: RequestHandler = (req, res, next) => {
   });
 };
 
-export const getInvoice: RequestHandler = (req, res, next) => {
-  const {params: {orderId}} = req;
+export const getInvoice: RequestHandler = async (req, res, next) => {
+  const { params: { orderId }, user } = req;
   const invoiceName = `invoice-${orderId}.pdf`;
   const invoicePath = path.join('app', 'invoices', invoiceName);
+  const order = await OrderModel.findById(orderId);
+  const productIds = new Set();
 
-  readFile(invoicePath, (err, data) => {
-    if (err) {
-      next(new Error(err));
-    }
-    res.setHeader('Content-Type', 'application/pdf')
-    res.send(data);
+  order.items.forEach(({ productId: id }) => productIds.add(id));
+
+  const products = await ProductModel.find({ _id: { $in: Array.from(productIds.values()) } });
+  const productsMap = products.reduce((map, product) => ({ ...map, [product.id]: product }), {});
+
+  if (order.userId._id.toString() !== user._id.toString()) {
+    next(new Error('Unauthorized'));
+  }
+
+  const pdfDocument = new PDFDocument();
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+
+  pdfDocument.pipe(createWriteStream(invoicePath));
+  pdfDocument.pipe(res);
+  pdfDocument.fontSize(26).text('Invoice', { underline: true });
+  pdfDocument.fontSize(26).text('------------------------');
+  pdfDocument.fontSize(14);
+  order.items.forEach(({ productId, quantity }) => {
+    const product = productsMap[productId._id.toString()];
+
+    pdfDocument.text(`${product.title} - (${quantity}) $(${product.price})`)
   });
+  pdfDocument.end();
 };
