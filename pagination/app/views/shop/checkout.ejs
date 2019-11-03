@@ -1,0 +1,44 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/product.css">
+<link rel="stylesheet" href="/css/cart.css">
+</head>
+
+<body>
+<%- include('../includes/navigation.ejs') %>
+
+<main>
+    <h1>Total Price: <%= totalPrice %></h1>
+    <% if (products.length > 0) { %>
+        <% products.forEach(productInfo => { %>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p><%= productsMap[productInfo.productId] && productsMap[productInfo.productId].title %>
+                        (<%= productInfo.quantity %>)</p>
+                    <form action="/cart-delete-item" method="post">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="productId" value="<%= productInfo.productId._id %>">
+                        <button class="btn btn-outline-danger" type="submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+        <% }) %>
+        <div class="order-button">
+            <form action="/create-order" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button id="order-btn" class="btn btn-outline-primary" type="submit">Checkout</button>
+                <script src="https://js.stripe.com/v3/"></script>
+                <script>
+                  const stripe = Stripe('<%= stripeAPIKey %>');
+                  const orderBtn = document.getElementById('order-btn');
+
+                  orderBtn.addEventListener(
+                    'click', () => stripe.redirectToCheckout({ sessionId: '<%= sessionId %>' })
+                  );
+                </script>
+            </form>
+        </div>
+    <% } else { %>
+        <h1>No Products in the Cart!</h1>
+    <% } %>
+</main>
+<%- include('../includes/end.ejs') %>

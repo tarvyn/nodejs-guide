@@ -4,14 +4,31 @@ import * as path from 'path';
 import PDFDocument from 'pdfkit';
 import { OrderModel } from '../model/order';
 import { ProductModel } from '../model/product.model';
+import Stripe from 'stripe';
+
+export const ITEMS_PER_PAGE = 1;
+const stripeAPIKey = 'sk_test_oxA7SS5TTZTtXKz6WsZJPOxG00SW2DDWln';
+const stripe = new Stripe(stripeAPIKey);
 
 export const getProducts: RequestHandler = async (req, res) => {
-  const prods = await ProductModel.find();
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const productsCount = await ProductModel.find().countDocuments();
+  const prods = await ProductModel
+    .find()
+    .skip((page - 1) * ITEMS_PER_PAGE)
+    .limit(ITEMS_PER_PAGE);
 
   res.render('shop/product-list', {
     prods,
     pageTitle: 'Shop',
-    path: '/products'
+    path: '/products',
+    productsCount,
+    showNextPage: ITEMS_PER_PAGE * page < productsCount,
+    showPreviousPage: page > 1,
+    currentPage: page,
+    nextPage: page + 1,
+    previousPage: page - 1,
+    lastPage: Math.ceil(productsCount / ITEMS_PER_PAGE)
   });
 };
 
@@ -27,13 +44,26 @@ export const getProduct: RequestHandler = async (req, res) => {
 };
 
 export const getIndex: RequestHandler = async (req, res) => {
-  const prods = await ProductModel.find();
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const productsCount = await ProductModel.find().countDocuments();
+
+  const prods = await ProductModel
+    .find()
+    .skip((page - 1) * ITEMS_PER_PAGE)
+    .limit(ITEMS_PER_PAGE);
 
   res.render('shop/index', {
     prods,
     pageTitle: 'Shop',
     path: '/',
-    csrfToken: req.csrfToken()
+    csrfToken: req.csrfToken(),
+    productsCount,
+    showNextPage: ITEMS_PER_PAGE * page < productsCount,
+    showPreviousPage: page > 1,
+    currentPage: page,
+    nextPage: page + 1,
+    previousPage: page - 1,
+    lastPage: Math.ceil(productsCount / ITEMS_PER_PAGE)
   });
 };
 
@@ -117,11 +147,49 @@ export const postOrder: RequestHandler = async (req, res) => {
   res.redirect('/orders');
 };
 
-export const getCheckout: RequestHandler = (req, res, next) => {
+export const getCheckout: RequestHandler = async (req, res, next) => {
+  const productIds = new Set();
+  const { user } = req;
+
+  if (!user) {
+    return res.redirect('/login');
+  }
+
+  user.cart.products.forEach(({ productId: id }) => productIds.add(id));
+
+  const products = await ProductModel.find({ _id: { $in: Array.from(productIds.values()) } });
+  const productsMap = products.reduce((map, product) => ({ ...map, [product.id]: product }), {});
+
+  let session;
+  try {
+    session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: user.cart.products.map(({productId: {_id}, quantity}) => {
+        const product = productsMap[_id.toString()];
+
+        return {
+          quantity,
+          name: product.title,
+          description: product.description,
+          amount: product.price * 100,
+          currency: 'usd'
+        };
+      }),
+      success_url: 'http://localhost:3000/checkout/success',
+      cancel_url: 'http://localhost:3000/checkout/cancel'
+    });
+  } catch (e) {
+    console.log(e);
+  }
+
   res.render('shop/checkout', {
-    prods: [],
+    stripeAPIKey,
+    sessionId: session.id,
+    productsMap,
+    products: user.cart.products,
+    totalPrice: user.cart.totalPrice,
     pageTitle: 'Checkout',
-    path: '/cart'
+    path: '/checkout'
   });
 };
 

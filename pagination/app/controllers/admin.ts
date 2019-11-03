@@ -108,24 +108,24 @@ export const postEditProduct: RequestHandler = async (req, res, next) => {
   res.redirect('/admin/products');
 };
 
-export const postDeleteProduct: RequestHandler = async (req, res, next) => {
-  const userId = req.user && req.user._id;
-  const { id } = req.body;
-  const product = await ProductModel.findById(id);
+export const deleteProduct: RequestHandler = async (req, res, next) => {
+  // const userId = req.user && req.user._id;
+  const { productId } = req.params;
+  const product = await ProductModel.findById(productId);
 
-  if (product.userId.toString() !== userId.toString()) {
-    return res.redirect('/');
-  }
+  // if (product.userId.toString() !== userId.toString()) {
+  //   return res.redirect('/');
+  // }
 
   try {
-    await ProductModel.findByIdAndDelete(id);
+    await ProductModel.findByIdAndDelete(productId);
     await deleteFile(path.join(__dirname, '../', product.imageUrl));
     // TODO: fix this temporary workaround
-    await OrderModel.deleteMany(() => {});
+    // await OrderModel.deleteMany(() => {});
   } catch (e) {
-    next(new Error('Error while deleting the product occurred.'));
+    res.status(500).json({message: e});
   }
-  res.redirect('/admin/products')
+  res.status(200).json({message: 'Success'});
 };
 
 export const getAdminProducts: RequestHandler = async (req, res, next) => {
