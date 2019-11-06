@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
 
 import Layout from './components/Layout/Layout';
 import Backdrop from './components/Backdrop/Backdrop';
@@ -17,7 +17,7 @@ class App extends Component {
   state = {
     showBackdrop: false,
     showMobileNav: false,
-    isAuth: true,
+    isAuth: false,
     token: null,
     userId: null,
     authLoading: false,
@@ -56,76 +56,88 @@ class App extends Component {
     localStorage.removeItem('userId');
   };
 
-  loginHandler = (event, authData) => {
+  loginHandler = (event, { email, password }) => {
     event.preventDefault();
     this.setState({ authLoading: true });
-    fetch('URL')
-      .then(res => {
-        if (res.status === 422) {
-          throw new Error('Validation failed.');
-        }
-        if (res.status !== 200 && res.status !== 201) {
-          console.log('Error!');
-          throw new Error('Could not authenticate you!');
-        }
-        return res.json();
-      })
-      .then(resData => {
-        console.log(resData);
-        this.setState({
-          isAuth: true,
-          token: resData.token,
-          authLoading: false,
-          userId: resData.userId
-        });
-        localStorage.setItem('token', resData.token);
-        localStorage.setItem('userId', resData.userId);
-        const remainingMilliseconds = 60 * 60 * 1000;
-        const expiryDate = new Date(
-          new Date().getTime() + remainingMilliseconds
-        );
-        localStorage.setItem('expiryDate', expiryDate.toISOString());
-        this.setAutoLogout(remainingMilliseconds);
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({
-          isAuth: false,
-          authLoading: false,
-          error: err
-        });
+    fetch('http://localhost:8080/auth/login', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    })
+    .then(res => {
+      if (res.status === 422) {
+        throw new Error('Validation failed.');
+      }
+      if (res.status !== 200 && res.status !== 201) {
+        console.log('Error!');
+        throw new Error('Could not authenticate you!');
+      }
+      return res.json();
+    })
+    .then(resData => {
+      console.log(resData);
+      this.setState({
+        isAuth: true,
+        token: resData.token,
+        authLoading: false,
+        userId: resData.userId
       });
+      localStorage.setItem('token', resData.token);
+      localStorage.setItem('userId', resData.userId);
+      const remainingMilliseconds = 60 * 60 * 1000;
+      const expiryDate = new Date(
+        new Date().getTime() + remainingMilliseconds
+      );
+      localStorage.setItem('expiryDate', expiryDate.toISOString());
+      this.setAutoLogout(remainingMilliseconds);
+    })
+    .catch(err => {
+      console.log(err);
+      this.setState({
+        isAuth: false,
+        authLoading: false,
+        error: err
+      });
+    });
   };
 
-  signupHandler = (event, authData) => {
+  signupHandler = (event, { signupForm: { email: { value: email }, password: { value: password }, name: { value: name } } }) => {
     event.preventDefault();
     this.setState({ authLoading: true });
-    fetch('URL')
-      .then(res => {
-        if (res.status === 422) {
-          throw new Error(
-            "Validation failed. Make sure the email address isn't used yet!"
-          );
-        }
-        if (res.status !== 200 && res.status !== 201) {
-          console.log('Error!');
-          throw new Error('Creating a user failed!');
-        }
-        return res.json();
-      })
-      .then(resData => {
-        console.log(resData);
-        this.setState({ isAuth: false, authLoading: false });
-        this.props.history.replace('/');
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({
-          isAuth: false,
-          authLoading: false,
-          error: err
-        });
+    fetch('http://localhost:8080/auth/signup', {
+      method: 'put',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password, name })
+    })
+    .then(res => {
+      if (res.status === 422) {
+        throw new Error(
+          "Validation failed. Make sure the email address isn't used yet!"
+        );
+      }
+      if (res.status !== 200 && res.status !== 201) {
+        console.log('Error!');
+        throw new Error('Creating a user failed!');
+      }
+      return res.json();
+    })
+    .then(resData => {
+      console.log(resData);
+      this.setState({ isAuth: false, authLoading: false });
+      this.props.history.replace('/');
+    })
+    .catch(err => {
+      console.log(err);
+      this.setState({
+        isAuth: false,
+        authLoading: false,
+        error: err
       });
+    });
   };
 
   setAutoLogout = milliseconds => {
@@ -163,7 +175,7 @@ class App extends Component {
             />
           )}
         />
-        <Redirect to="/" />
+        <Redirect to="/"/>
       </Switch>
     );
     if (this.state.isAuth) {
@@ -173,7 +185,7 @@ class App extends Component {
             path="/"
             exact
             render={props => (
-              <FeedPage userId={this.state.userId} token={this.state.token} />
+              <FeedPage userId={this.state.userId} token={this.state.token}/>
             )}
           />
           <Route
@@ -186,16 +198,16 @@ class App extends Component {
               />
             )}
           />
-          <Redirect to="/" />
+          <Redirect to="/"/>
         </Switch>
       );
     }
     return (
       <Fragment>
         {this.state.showBackdrop && (
-          <Backdrop onClick={this.backdropClickHandler} />
+          <Backdrop onClick={this.backdropClickHandler}/>
         )}
-        <ErrorHandler error={this.state.error} onHandle={this.errorHandler} />
+        <ErrorHandler error={this.state.error} onHandle={this.errorHandler}/>
         <Layout
           header={
             <Toolbar>
