@@ -24,7 +24,7 @@
   "devDependencies": {
     "@types/bluebird": "^3.5.27",
     "@types/validator": "^10.11.1",
-    "ts-loader": "^6.0.4",
+    "ts-loader": "^9.4.2",
     "ts-node-dev": "^1.0.0-pre.40"
   }
 }
