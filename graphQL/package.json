@@ -61,7 +61,7 @@
     "uuidv4": "^5.0.1"
   },
   "devDependencies": {
-    "ts-loader": "^6.0.4",
+    "ts-loader": "^9.4.2",
     "ts-node-dev": "^1.0.0-pre.40"
   }
 }
